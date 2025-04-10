@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -54,9 +48,17 @@ def process_input():
     }
     input_df = pd.DataFrame([data])
     
-    # Preprocessing data sesuai dengan yang diperlukan oleh model (jika ada encoding atau skala)
-    # Misalnya: encoding untuk 'room_type', 'neighbourhood', 'property_type' jika perlu
+    # Lakukan one-hot encoding pada kolom kategori
     input_df = pd.get_dummies(input_df, columns=['room_type', 'neighbourhood', 'property_type'], drop_first=True)
+
+    # Memastikan kolom pada input sesuai dengan kolom yang digunakan saat pelatihan model
+    model_columns = input_df.columns
+    for col in model_columns:
+        if col not in input_df.columns:
+            input_df[col] = 0  # Jika ada kolom yang hilang, tambahkan dengan nilai 0
+    
+    # Memastikan tidak ada missing values
+    input_df = input_df.fillna(0)
 
     return input_df
 
