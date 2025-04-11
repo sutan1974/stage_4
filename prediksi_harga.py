@@ -48,11 +48,16 @@ def process_input():
     }
     input_df = pd.DataFrame([data])
     
-    # Handle missing values (if any)
-    input_df = input_df.fillna(input_df.median())  # For numeric columns
-    input_df['room_type'] = input_df['room_type'].fillna(input_df['room_type'].mode()[0])  # For categorical columns
-    input_df['neighbourhood'] = input_df['neighbourhood'].fillna(input_df['neighbourhood'].mode()[0])
-    input_df['property_type'] = input_df['property_type'].fillna(input_df['property_type'].mode()[0])
+    # Identifying numerical and categorical columns
+    numerical_columns = input_df.select_dtypes(include=['float64', 'int64']).columns
+    categorical_columns = input_df.select_dtypes(include=['object']).columns
+    
+    # Handle missing values for numerical columns with median
+    input_df[numerical_columns] = input_df[numerical_columns].fillna(input_df[numerical_columns].median())
+    
+    # Handle missing values for categorical columns with mode
+    for col in categorical_columns:
+        input_df[col] = input_df[col].fillna(input_df[col].mode()[0])
     
     # Apply one-hot encoding to categorical columns
     input_df = pd.get_dummies(input_df, columns=['room_type', 'neighbourhood', 'property_type'], drop_first=True)
