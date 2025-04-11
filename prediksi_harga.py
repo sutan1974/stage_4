@@ -48,17 +48,14 @@ def process_input():
     }
     input_df = pd.DataFrame([data])
     
-    # Lakukan one-hot encoding pada kolom kategori
-    input_df = pd.get_dummies(input_df, columns=['room_type', 'neighbourhood', 'property_type'], drop_first=True)
-
-    # Memastikan kolom pada input sesuai dengan kolom yang digunakan saat pelatihan model
-    model_columns = input_df.columns
-    for col in model_columns:
-        if col not in input_df.columns:
-            input_df[col] = 0  # Jika ada kolom yang hilang, tambahkan dengan nilai 0
+    # Handle missing values (if any)
+    input_df = input_df.fillna(input_df.median())  # For numeric columns
+    input_df['room_type'] = input_df['room_type'].fillna(input_df['room_type'].mode()[0])  # For categorical columns
+    input_df['neighbourhood'] = input_df['neighbourhood'].fillna(input_df['neighbourhood'].mode()[0])
+    input_df['property_type'] = input_df['property_type'].fillna(input_df['property_type'].mode()[0])
     
-    # Memastikan tidak ada missing values
-    input_df = input_df.fillna(0)
+    # Apply one-hot encoding to categorical columns
+    input_df = pd.get_dummies(input_df, columns=['room_type', 'neighbourhood', 'property_type'], drop_first=True)
 
     return input_df
 
@@ -67,9 +64,12 @@ if st.button('Prediksi Harga'):
     # Proses input
     input_data = process_input()
 
-    # Prediksi harga menggunakan model yang sudah dilatih
-    prediction = model.predict(input_data)
-    
-    # Menampilkan hasil prediksi
-    st.subheader(f"Prediksi Harga: ${prediction[0]:,.2f}")
-
+    # Check for missing values in the input data after processing
+    if input_data.isnull().sum().any():
+        st.error("Input data contains missing values. Please fill them in.")
+    else:
+        # Prediksi harga menggunakan model yang sudah dilatih
+        prediction = model.predict(input_data)
+        
+        # Menampilkan hasil prediksi
+        st.subheader(f"Prediksi Harga: ${prediction[0]:,.2f}")
