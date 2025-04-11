@@ -64,17 +64,12 @@ def process_input():
 
     return input_df
 
-# Tombol prediksi harga
-if st.button('Prediksi Harga'):
-    # Proses input
-    input_data = process_input()
+ # Tombol untuk prediksi
+    if st.button("Predict Price"):
+        if model is not None:
+            # Prediksi harga
+            prediction = model.predict(input_data)
+            st.write(f"🏡 **Predicted Price: ${prediction[0]:,.2f}**")
+        else:
+            st.error("⚠️ Model is not loaded. Please check the file and try again.")
 
-    # Check for missing values in the input data after processing
-    if input_data.isnull().sum().any():
-        st.error("Input data contains missing values. Please fill them in.")
-    else:
-        # Prediksi harga menggunakan model yang sudah dilatih
-        prediction = model.predict(input_data)
-        
-        # Menampilkan hasil prediksi
-        st.subheader(f"Prediksi Harga: ${prediction[0]:,.2f}")
