@@ -48,19 +48,26 @@ def process_input():
     }
     input_df = pd.DataFrame([data])
     
-    # Identifying numerical and categorical columns
+    # Mengidentifikasi kolom numerik dan kategorikal
     numerical_columns = input_df.select_dtypes(include=['float64', 'int64']).columns
     categorical_columns = input_df.select_dtypes(include=['object']).columns
     
-    # Handle missing values for numerical columns with median
+    # Menangani nilai hilang untuk kolom numerik dengan median
     input_df[numerical_columns] = input_df[numerical_columns].fillna(input_df[numerical_columns].median())
     
-    # Handle missing values for categorical columns with mode
+    # Menangani nilai hilang untuk kolom kategorikal dengan modus
     for col in categorical_columns:
         input_df[col] = input_df[col].fillna(input_df[col].mode()[0])
     
-    # Apply one-hot encoding to categorical columns
+    # Terapkan one-hot encoding pada kolom kategorikal
     input_df = pd.get_dummies(input_df, columns=['room_type', 'neighbourhood', 'property_type'], drop_first=True)
+    
+    # Pastikan input memiliki jumlah kolom yang sama dengan yang diharapkan oleh model
+    # Muat model dan dapatkan kolom yang diharapkan oleh model (untuk pengecekan)
+    model_columns = joblib.load('random_search.joblib').feature_names_in_
+
+    # Sesuaikan data input dengan kolom fitur yang diharapkan oleh model
+    input_df = input_df.reindex(columns=model_columns, fill_value=0)
 
     return input_df
 
