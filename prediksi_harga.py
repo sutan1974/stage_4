@@ -29,6 +29,10 @@ property_type = st.selectbox('Tipe Properti (Property Type)', ['House', 'Apartme
 model = joblib.load('random_search.joblib')  # Ganti dengan nama model Anda
 
 # Fungsi untuk memproses input
+import pandas as pd
+import joblib
+
+# Process input function
 def process_input():
     data = {
         'bedrooms': bedrooms,
@@ -47,7 +51,7 @@ def process_input():
         'property_type': property_type
     }
     input_df = pd.DataFrame([data])
-    
+
     # Identifying numerical and categorical columns
     numerical_columns = input_df.select_dtypes(include=['float64', 'int64']).columns
     categorical_columns = input_df.select_dtypes(include=['object']).columns
@@ -61,14 +65,14 @@ def process_input():
     
     # Apply one-hot encoding to categorical columns
     input_df = pd.get_dummies(input_df, columns=['room_type', 'neighbourhood', 'property_type'], drop_first=True)
-    
+
     # Check for missing values after one-hot encoding
     if input_df.isnull().sum().sum() > 0:
         input_df = input_df.fillna(0)  # Ensure no missing values remain
-    
+
     # Ensure the input has the same number of columns as the model expects
     model = joblib.load('random_search.joblib')
-    
+
     if hasattr(model, 'feature_names_in_'):
         model_columns = model.feature_names_in_
     else:
@@ -85,15 +89,17 @@ def process_input():
         input_df = input_df.fillna(0)
 
     return input_df
- # Tombol prediksi harga
-if st.button('Prediksi Harga'):
-    # Proses input
-    input_data = process_input()
 
-    # Prediksi harga menggunakan model yang sudah dilatih
-    prediction = model.predict(input_data)
-    
-    # Menampilkan hasil prediksi
-    st.subheader(f"Prediksi Harga: ${prediction[0]:,.2f}")
+# Before prediction: Check the input data for any missing values
+input_data = process_input()
 
+# Check if there are any missing values right before prediction
+if input_data.isnull().sum().sum() > 0:
+    print("Missing values detected in input data!")
+    input_data = input_data.fillna(0)  # Ensure no missing values
 
+# Prediction
+prediction = model.predict(input_data)
+
+# Output the prediction
+print(f"Predicted Price: ${prediction[0]:,.2f}")
