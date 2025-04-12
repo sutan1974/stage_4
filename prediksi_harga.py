@@ -29,44 +29,28 @@ property_type = st.selectbox('Tipe Properti (Property Type)', ['House', 'Apartme
 model = joblib.load('random_search.joblib')  # Ganti dengan nama model Anda
 
 # Fungsi untuk memproses input
-def process_input():
-    data = {
-        'bedrooms': bedrooms,
-        'bathrooms': bathrooms,
-        'beds': beds,
-        'minimum_nights': minimum_nights,
-        'maximum_nights': maximum_nights,
-        'availability_365': availability_365,
-        'review_scores_rating': review_scores_rating,
-        'reviews_per_month': reviews_per_month,
-        'room_type': room_type,
-        'host_is_superhost': 1 if host_is_superhost == 'Yes' else 0,
-        'neighbourhood': neighbourhood,
-        'latitude': latitude,
-        'longitude': longitude,
-        'property_type': property_type
-    }
-    input_df = pd.DataFrame([data])
-    
-    # Mengidentifikasi kolom numerik dan kategorikal
+# Identifying numerical and categorical columns
     numerical_columns = input_df.select_dtypes(include=['float64', 'int64']).columns
     categorical_columns = input_df.select_dtypes(include=['object']).columns
     
-    # Menangani nilai hilang untuk kolom numerik dengan median
+    # Handle missing values for numerical columns with median
     input_df[numerical_columns] = input_df[numerical_columns].fillna(input_df[numerical_columns].median())
     
-    # Menangani nilai hilang untuk kolom kategorikal dengan modus
+    # Handle missing values for categorical columns with mode
     for col in categorical_columns:
         input_df[col] = input_df[col].fillna(input_df[col].mode()[0])
     
-    # Terapkan one-hot encoding pada kolom kategorikal
+    # Apply one-hot encoding to categorical columns
     input_df = pd.get_dummies(input_df, columns=['room_type', 'neighbourhood', 'property_type'], drop_first=True)
     
-    # Pastikan input memiliki jumlah kolom yang sama dengan yang diharapkan oleh model
-    # Muat model dan dapatkan kolom yang diharapkan oleh model (untuk pengecekan)
+    # Check for missing values after one-hot encoding
+    if input_df.isnull().sum().sum() > 0:
+        input_df = input_df.fillna(0)  # Ensure no missing values remain
+
+    # Ensure the input has the same number of columns as the model expects
     model_columns = joblib.load('random_search.joblib').feature_names_in_
 
-    # Sesuaikan data input dengan kolom fitur yang diharapkan oleh model
+    # Align the input data to match the model's feature columns
     input_df = input_df.reindex(columns=model_columns, fill_value=0)
 
     return input_df
