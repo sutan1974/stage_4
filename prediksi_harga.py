@@ -104,5 +104,6 @@ if st.button('Prediksi Harga'):
 # Prediction
 prediction = model.predict(input_data)
 
-# Output the prediction
-print(f"Predicted Price: ${prediction[0]:,.2f}")
+# Menampilkan hasil prediksi
+    st.subheader(f"Prediksi Harga: ${prediction[0]:,.2f}")
+
