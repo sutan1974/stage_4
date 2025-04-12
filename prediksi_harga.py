@@ -98,6 +98,9 @@ if input_data.isnull().sum().sum() > 0:
     print("Missing values detected in input data!")
     input_data = input_data.fillna(0)  # Ensure no missing values
 
+if st.button('Prediksi Harga'):
+    # Proses input
+    input_data = process_input()
 # Prediction
 prediction = model.predict(input_data)
 
