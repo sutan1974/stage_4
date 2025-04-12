@@ -65,10 +65,18 @@ def process_input():
     if input_df.isnull().sum().sum() > 0:
         input_df = input_df.fillna(0)  # Ensure no missing values remain
 
-    # Ensure the input has the same number of columns as the model expects
-    model_columns = joblib.load('random_search.joblib').feature_names_in_
+   # Muat model dan tangani jika `feature_names_in_` tidak ada
+    model = joblib.load('random_search.joblib')
+    
+    if hasattr(model, 'feature_names_in_'):
+        model_columns = model.feature_names_in_
+    else:
+        # Cadangan: Tentukan kolom secara manual berdasarkan proses pelatihan Anda
+        print("Model tidak memiliki atribut 'feature_names_in_'.")
+        # Contoh cadangan: Ambil kolom dari input_df yang diharapkan sesuai
+        model_columns = input_df.columns  # Asumsikan kolom input_df adalah fitur yang benar
 
-    # Align the input data to match the model's feature columns
+    # Sesuaikan data input dengan kolom fitur yang diharapkan oleh model
     input_df = input_df.reindex(columns=model_columns, fill_value=0)
 
     return input_df
