@@ -47,7 +47,8 @@ def process_input():
         'property_type': property_type
     }
     input_df = pd.DataFrame([data])
-# Identifying numerical and categorical columns
+    
+    # Identifying numerical and categorical columns
     numerical_columns = input_df.select_dtypes(include=['float64', 'int64']).columns
     categorical_columns = input_df.select_dtypes(include=['object']).columns
     
@@ -64,23 +65,26 @@ def process_input():
     # Check for missing values after one-hot encoding
     if input_df.isnull().sum().sum() > 0:
         input_df = input_df.fillna(0)  # Ensure no missing values remain
-
-   # Muat model dan tangani jika `feature_names_in_` tidak ada
+    
+    # Ensure the input has the same number of columns as the model expects
     model = joblib.load('random_search.joblib')
     
     if hasattr(model, 'feature_names_in_'):
         model_columns = model.feature_names_in_
     else:
-        # Cadangan: Tentukan kolom secara manual berdasarkan proses pelatihan Anda
-        print("Model tidak memiliki atribut 'feature_names_in_'.")
-        # Contoh cadangan: Ambil kolom dari input_df yang diharapkan sesuai
-        model_columns = input_df.columns  # Asumsikan kolom input_df adalah fitur yang benar
+        # Fallback: Manually define the columns based on your training process
+        print("Model does not have 'feature_names_in_' attribute.")
+        model_columns = input_df.columns  # Assuming the columns of input_df are the correct features
 
-    # Sesuaikan data input dengan kolom fitur yang diharapkan oleh model
+    # Align the input data to match the model's feature columns
     input_df = input_df.reindex(columns=model_columns, fill_value=0)
 
-    return input_df
+    # Check if there are any missing values before prediction
+    if input_df.isnull().sum().sum() > 0:
+        print("There are still missing values in the input data. Filling them with zeros.")
+        input_df = input_df.fillna(0)
 
+    return input_df
  # Tombol prediksi harga
 if st.button('Prediksi Harga'):
     # Proses input
