@@ -29,6 +29,24 @@ property_type = st.selectbox('Tipe Properti (Property Type)', ['House', 'Apartme
 model = joblib.load('random_search.joblib')  # Ganti dengan nama model Anda
 
 # Fungsi untuk memproses input
+def process_input():
+    data = {
+        'bedrooms': bedrooms,
+        'bathrooms': bathrooms,
+        'beds': beds,
+        'minimum_nights': minimum_nights,
+        'maximum_nights': maximum_nights,
+        'availability_365': availability_365,
+        'review_scores_rating': review_scores_rating,
+        'reviews_per_month': reviews_per_month,
+        'room_type': room_type,
+        'host_is_superhost': 1 if host_is_superhost == 'Yes' else 0,
+        'neighbourhood': neighbourhood,
+        'latitude': latitude,
+        'longitude': longitude,
+        'property_type': property_type
+    }
+    input_df = pd.DataFrame([data])
 # Identifying numerical and categorical columns
     numerical_columns = input_df.select_dtypes(include=['float64', 'int64']).columns
     categorical_columns = input_df.select_dtypes(include=['object']).columns
